@@ -1,4 +1,4 @@
-FROM bitnami/minideb-extras:jessie-r22
+FROM bitnami/minideb-extras:stretch-r22
 LABEL maintainer "Bitnami <containers@bitnami.com>"
 
 # Install required system packages and dependencies
