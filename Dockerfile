@@ -1,24 +1,11 @@
-FROM debian:jessie
+FROM php:7-fpm
 
-RUN apt-get update && apt-get install -y \
-            vim \
-            supervisor \
-            postfix \
-            sasl2-bin \
-            opendkim \
-            opendkim-tools \
-            rsyslog
-RUN sed -i "s/inet_interfaces = localhost/inet_interfaces = all/g" /etc/postfix/main.cf \
- && sed -i "s/^mydestination.*/mydestination = \$myhostname, localhost.\$mydomain, localhost/g" /etc/postfix/main.cf
-RUN echo >> /etc/postfix/main.cf
-
-
-RUN ln -snf /etc/services /var/spool/postfix/etc/services
-RUN mkdir -p /etc/postfix/certs && mkdir -p /etc/opendkim/domainkeys
-COPY init.sh /root/init.sh
-COPY supervisord.conf /etc/supervisor/supervisord.conf
-COPY rsyslog.conf /etc/rsyslog.conf
-COPY listen.conf /etc/rsyslog.d/listen.conf
-RUN chmod 777 /root/init.sh
-
-CMD /root/init.sh;/usr/bin/supervisord -c /etc/supervisor/supervisord.conf
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ssmtp libpq-dev libmagickwand-dev \
+  && docker-php-ext-install mysqli pdo_pgsql pdo_mysql
+RUN apt-get update && apt-get install -y libpng12-dev libjpeg-dev libpq-dev \
+&& rm -rf /var/lib/apt/lists/* \
+&& docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr \
+&& docker-php-ext-install gd mbstring pdo pdo_mysql pdo_pgsql \
+&& pecl install imagick  \
+&& docker-php-ext-enable imagick
